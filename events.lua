@@ -1,3 +1,10 @@
+------------------------------------------------------------------------------
+-- EventEmitter Class in Node.js Style
+-- 
+-- LICENCE: MIT
+-- Simen Li <simenkid@gmail.com>
+------------------------------------------------------------------------------
+
 -- .defaultMaxListeners
 -- .addListener(event, listener)
 -- .removeListener(event, listener)

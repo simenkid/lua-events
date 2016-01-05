@@ -46,6 +46,7 @@ function Events:addListener(ev, listener)
 end
 
 function Events:emit(ev, ...)
+    local count = 0
     local pfx_ev = PFX .. tostring(ev)
     local evtbl = self:evTable(pfx_ev)
 
@@ -54,6 +55,7 @@ function Events:emit(ev, ...)
         if not (status) then
             print(string.sub(_pfx_ev, 1, PFX_LEN) .. " emit error: " .. tostring(err))
         end
+        count = count + 1
     end
 
     -- one-time listener
@@ -65,13 +67,15 @@ function Events:emit(ev, ...)
         if not (status) then
             print(string.sub(_pfx_ev, 1, PFX_LEN) .. " emit error: " .. tostring(err))
         end
+        count = count + 1
     end
 
     for i, lsn in ipairs(evtbl) do table.remove(evtbl, i) end
 
     self._on[pfx_ev] = nil
 
-    return self
+    if (count > 0) then return true
+    else return false end
 end
 
 function Events:getMaxListeners()
@@ -100,7 +104,9 @@ end
 
 function Events:listeners(ev)
     local pfx_ev = PFX .. tostring(ev)
-    local evtbl = self:evTable(pfx_ev)
+    local evtbl = {}
+
+    for i, lsn in ipairs(self:evTable(pfx_ev)) do evtbl[i] = lsn end
 
     return evtbl
 end

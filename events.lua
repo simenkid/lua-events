@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- EventEmitter Class in Node.js Style
 -- 
--- LICENCE: MIT
+-- LICENSE: MIT
 -- Simen Li <simenkid@gmail.com>
 ------------------------------------------------------------------------------
 local PFX = '__lsn_'

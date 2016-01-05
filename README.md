@@ -13,7 +13,7 @@ lua-events
 
 **lua-events** is an EventEmitter class that provides you with APIs in node.js style.  
   
-I am using this module with my own [**nodemcu**](#https://github.com/nodemcu/nodemcu-firmware) project on [ESP8266](#http://www.esp8266.com/) WiFi Soc. It helps me write my code in *event-driven* style. I often grab a emitter from this module and use the emitter as an event hub in my application to control my program flow. Try it on **nodemcu**, it won't let you down.
+I am using this module with my own [**nodemcu**](https://github.com/nodemcu/nodemcu-firmware) project on [ESP8266](http://www.esp8266.com/) WiFi Soc. It helps me write my code in *event-driven* style. I often grab a emitter from this module and use the emitter as an event hub in my application to control my program flow. Try it on **nodemcu**, it won't let you down.
 
 
 <a name="Installation"></a>

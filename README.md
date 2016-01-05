@@ -68,7 +68,7 @@ local myObject = {
     end
 }
 
-local myObject = EventEmitter:new(myObject)
+myObject = EventEmitter:new(myObject)
 
 myObject:on('knock', function ()
     print('knock, knock!')

@@ -37,25 +37,22 @@ function Events:addListener(ev, listener)
 
     table.insert(evtbl, listener)
 
-    local lsnNum = #evtbl
-    if (lsnNum > maxLsnNum) then
-        print('WARN: Number of ' .. string.sub(_pfx_ev, 1, PFX_LEN) .. " event listeners: " .. tostring(lsnNum))
+    if (#evtbl > maxLsnNum) then
+        print('WARN: Number of ' .. string.sub(pfx_ev, PFX_LEN + 1) .. " event listeners: " .. tostring(lsnNum))
     end
 
     return self
 end
 
 function Events:emit(ev, ...)
-    local count = 0
     local pfx_ev = PFX .. tostring(ev)
     local evtbl = self:evTable(pfx_ev)
 
     for _, lsn in ipairs(evtbl) do
         local status, err = pcall(lsn, ...)
         if not (status) then
-            print(string.sub(_pfx_ev, 1, PFX_LEN) .. " emit error: " .. tostring(err))
+            print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err))
         end
-        count = count + 1
     end
 
     -- one-time listener
@@ -65,17 +62,15 @@ function Events:emit(ev, ...)
     for _, lsn in ipairs(evtbl) do
         local status, err = pcall(lsn, ...)
         if not (status) then
-            print(string.sub(_pfx_ev, 1, PFX_LEN) .. " emit error: " .. tostring(err))
+            print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err))
         end
-        count = count + 1
     end
 
-    for i, lsn in ipairs(evtbl) do table.remove(evtbl, i) end
+    while (#evtbl ~= 0) do table.remove(evtbl, 1) end
 
     self._on[pfx_ev] = nil
 
-    if (count > 0) then return true
-    else return false end
+    return self
 end
 
 function Events:getMaxListeners()
@@ -104,9 +99,7 @@ end
 
 function Events:listeners(ev)
     local pfx_ev = PFX .. tostring(ev)
-    local evtbl = {}
-
-    for i, lsn in ipairs(self:evTable(pfx_ev)) do evtbl[i] = lsn end
+    local evtbl = self:evTable(pfx_ev)
 
     return evtbl
 end
@@ -122,21 +115,24 @@ function Events:once(ev, listener)
 end
 
 function Events:removeAllListeners(ev)
+
     if ev ~= nil then
         local pfx_ev = PFX .. tostring(ev)
         local evtbl = self:evTable(pfx_ev)
 
-        for i, lsn in ipairs(evtbl) do table.remove(evtbl, i) end
+        while (#evtbl ~= 0) do table.remove(evtbl, 1) end
 
         pfx_ev = pfx_ev .. ':once'
         evtbl = self:evTable(pfx_ev)
 
-        for i, lsn in ipairs(evtbl) do table.remove(evtbl, i) end
+        while (#evtbl ~= 0) do  table.remove(evtbl, 1) end
 
         self._on[pfx_ev] = nil
     else
         for _pfx_ev, _table in pairs(self._on) do
-            self:removeAllListeners(string.sub(_pfx_ev, 1, PFX_LEN))
+            print('########')
+            print(_pfx_ev)
+            self:removeAllListeners(string.sub(_pfx_ev, PFX_LEN + 1))
         end
     end
 
@@ -146,10 +142,21 @@ end
 function Events:removeListener(ev, listener)
     local pfx_ev = PFX .. tostring(ev)
     local evtbl = self:evTable(pfx_ev)
-
+    local lsnCount = 0
+    assert(listener ~= nil, "listener is nil")
     -- normal listener
+
     for i, lsn in ipairs(evtbl) do
-        if lsn == listener then table.remove(evtbl, i) end
+        if lsn == listener then lsnCount = lsnCount + 1 end
+    end
+
+    while (lsnCount ~= 0) do
+        for i, lsn in ipairs(evtbl) do
+            if lsn == listener then
+                table.remove(evtbl, i)
+                lsnCount = lsnCount - 1
+            end
+        end
     end
 
     if (#evtbl == 0) then self._on[pfx_ev] = nil end
@@ -158,8 +165,18 @@ function Events:removeListener(ev, listener)
     pfx_ev = pfx_ev .. ':once'
     evtbl = self:evTable(pfx_ev)
 
+    lsnCount = 0
     for i, lsn in ipairs(evtbl) do
-        if lsn == listener then table.remove(evtbl, i) end
+        if lsn == listener then lsnCount = lsnCount + 1 end
+    end
+
+    while (lsnCount ~= 0) do
+        for i, lsn in ipairs(evtbl) do
+            if lsn == listener then
+                table.remove(evtbl, i)
+                lsnCount = lsnCount - 1
+            end
+        end
     end
 
     if (#evtbl == 0) then self._on[pfx_ev] = nil end

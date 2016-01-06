@@ -16,14 +16,17 @@ function Events:new(obj)
     obj = obj or {}
     self.__index = self
     setmetatable(obj, self)
-    obj._on = {}        -- instance property of '_.on'
+    obj._on = {}
 
     return obj
 end
 
 function Events:evTable(ev)
     if (type(self._on[ev]) ~= 'table') then self._on[ev] = {} end
+    return self._on[ev]
+end
 
+function Events:getEvTable(ev)
     return self._on[ev]
 end
 
@@ -34,74 +37,76 @@ function Events:addListener(ev, listener)
     local pfx_ev = PFX .. tostring(ev)
     local evtbl = self:evTable(pfx_ev)
     local maxLsnNum = self.currentMaxListeners or self.defaultMaxListeners
-
+    local lsnNum = self:listenerCount(ev)
     table.insert(evtbl, listener)
 
-    if (#evtbl > maxLsnNum) then
-        print('WARN: Number of ' .. string.sub(pfx_ev, PFX_LEN + 1) .. " event listeners: " .. tostring(lsnNum))
-    end
-
+    if (lsnNum > maxLsnNum) then  print('WARN: Number of ' .. string.sub(pfx_ev, PFX_LEN + 1) .. " event listeners: " .. tostring(lsnNum)) end
     return self
 end
 
 function Events:emit(ev, ...)
     local pfx_ev = PFX .. tostring(ev)
-    local evtbl = self:evTable(pfx_ev)
+    local evtbl = self:getEvTable(pfx_ev)
 
-    for _, lsn in ipairs(evtbl) do
-        local status, err = pcall(lsn, ...)
-        if not (status) then
-            print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err))
+    if (evtbl ~= nil) then
+        for _, lsn in ipairs(evtbl) do
+            local status, err = pcall(lsn, ...)
+            if not (status) then print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err)) end
         end
     end
 
     -- one-time listener
     pfx_ev = pfx_ev .. ':once'
-    evtbl = self:evTable(pfx_ev)
+    evtbl = self:getEvTable(pfx_ev)
 
-    for _, lsn in ipairs(evtbl) do
-        local status, err = pcall(lsn, ...)
-        if not (status) then
-            print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err))
+    if (evtbl ~= nil) then
+        for _, lsn in ipairs(evtbl) do
+            local status, err = pcall(lsn, ...)
+            if not (status) then print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err)) end
         end
+
+        while (#evtbl ~= 0) do table.remove(evtbl, 1) end
+        self._on[pfx_ev] = nil
     end
-
-    while (#evtbl ~= 0) do table.remove(evtbl, 1) end
-
-    self._on[pfx_ev] = nil
-
     return self
 end
 
 function Events:getMaxListeners()
-    local maxLsnNum = self.currentMaxListeners or self.defaultMaxListeners
-    return maxLsnNum
+    return self.currentMaxListeners or self.defaultMaxListeners
 end
 
 function Events:listenerCount(ev)
     local totalNum = 0
     local pfx_ev = PFX .. tostring(ev)
-    local evtbl = self:evTable(pfx_ev)
+    local evtbl = self:getEvTable(pfx_ev)
 
-    totalNum = totalNum + #evtbl;
-
-    if (#evtbl == 0) then self._on[pfx_ev] = nil end
+    if (evtbl ~= nil) then totalNum = totalNum + #evtbl end
 
     pfx_ev = pfx_ev .. ':once'
-    evtbl = self:evTable(pfx_ev)
+    evtbl = self:getEvTable(pfx_ev)
 
-    totalNum = totalNum + #evtbl;
-
-    if (#evtbl == 0) then self._on[pfx_ev] = nil end
+    if (evtbl ~= nil) then totalNum = totalNum + #evtbl end
 
     return totalNum
 end
 
 function Events:listeners(ev)
     local pfx_ev = PFX .. tostring(ev)
-    local evtbl = self:evTable(pfx_ev)
+    local evtbl = self:getEvTable(pfx_ev)
+    local clone = {}
 
-    return evtbl
+    if (evtbl ~= nil) then
+        for i, lsn in ipairs(evtbl) do table.insert(clone, lsn) end
+    end
+
+    pfx_ev = pfx_ev .. ':once'
+    evtbl = self:getEvTable(pfx_ev)
+
+    if (evtbl ~= nil) then
+        for i, lsn in ipairs(evtbl) do table.insert(clone, lsn) end
+    end
+
+    return clone
 end
 
 Events.on = Events.addListener
@@ -109,13 +114,15 @@ Events.on = Events.addListener
 function Events:once(ev, listener)
     local pfx_ev = PFX .. tostring(ev) .. ':once'
     local evtbl = self:evTable(pfx_ev)
+    local maxLsnNum = self.currentMaxListeners or self.defaultMaxListeners
+    local lsnNum = self:listenerCount(ev)
+    if (lsnNum > maxLsnNum) then print('WARN: Number of ' .. ev .. " event listeners: " .. tostring(lsnNum)) end
 
     table.insert(evtbl, listener)
     return self
 end
 
 function Events:removeAllListeners(ev)
-
     if ev ~= nil then
         local pfx_ev = PFX .. tostring(ev)
         local evtbl = self:evTable(pfx_ev)
@@ -126,14 +133,13 @@ function Events:removeAllListeners(ev)
         evtbl = self:evTable(pfx_ev)
 
         while (#evtbl ~= 0) do  table.remove(evtbl, 1) end
-
         self._on[pfx_ev] = nil
     else
-        for _pfx_ev, _table in pairs(self._on) do
-            print('########')
-            print(_pfx_ev)
-            self:removeAllListeners(string.sub(_pfx_ev, PFX_LEN + 1))
-        end
+        for _pfx_ev, _t in pairs(self._on) do self:removeAllListeners(string.sub(_pfx_ev, PFX_LEN + 1)) end
+    end
+
+    for _pfx_ev, _t in pairs(self._on) do
+        if (#_t == 0) then self._on[_pfx_ev] = nil end
     end
 
     return self
@@ -145,7 +151,6 @@ function Events:removeListener(ev, listener)
     local lsnCount = 0
     assert(listener ~= nil, "listener is nil")
     -- normal listener
-
     for i, lsn in ipairs(evtbl) do
         if lsn == listener then lsnCount = lsnCount + 1 end
     end
@@ -180,7 +185,6 @@ function Events:removeListener(ev, listener)
     end
 
     if (#evtbl == 0) then self._on[pfx_ev] = nil end
-
     return self
 end
 

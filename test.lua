@@ -63,6 +63,7 @@ print(emitter:listenerCount('test_once_args'))
 print(emitter:listeners())
 print(emitter:setMaxListeners(20))
 print(emitter:getMaxListeners())
+print(emitter:setMaxListeners(10))
 
 emitter:emit('test_on')
 emitter:emit('test_on')
@@ -81,11 +82,12 @@ emitter:removeAllListeners('test_on')
 emitter:emit('test_on')
 emitter:emit('test_on')
 
--- emitter:removeAllListeners('test_on_args')
+print(emitter:listenerCount('test_on_args'))
+emitter:removeAllListeners('test_on_args')
+print(emitter:listenerCount('test_on_args'))
 
 emitter:removeAllListeners()
 print('remove all listeners')
-
 
 emitter:emit('test_on')
 emitter:emit('test_on')
@@ -99,3 +101,59 @@ emitter:emit('test_once')
 
 emitter:emit('test_once_args', 1, 'hello', { x = 'x' })
 emitter:emit('test_once_args', 1, 'hello', { x = 'x' })
+
+--------------------------------------------------------------
+local cb1 = function () 
+    print('>> cb1_test_on fires')
+end
+
+local cb1once = function () 
+    print('**** cb1_test_once fires')
+end
+
+local cb2 = function (...) 
+    print('cb2_test_on fires')
+    print(...)
+end
+
+print('-----------------------------------')
+
+emitter:on('cb1_test_on', cb1)
+emitter:on('cb1_test_on', cb1)
+emitter:on('cb1_test_on', cb1)
+
+emitter:once('cb1_test_once', cb1once)
+emitter:once('cb1_test_once', cb1once)
+emitter:once('cb1_test_once', cb1once)
+
+emitter:on('cb2_test_on', cb2)
+emitter:on('cb2_test_on', cb2)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+emitter:once('cb2_test_on', cb1)
+print('******')
+print(emitter:getMaxListeners())
+print(emitter:listenerCount('cb2_test_on'))
+print(#emitter:listeners('cb2_test_on'))
+
+emitter:emit('cb1_test_on')
+emitter:emit('cb1_test_on')
+
+emitter:emit('cb1_test_once')
+emitter:emit('cb1_test_once')
+emitter:emit('cb1_test_once')
+
+emitter:emit('cb2_test_on', 1, 2, 'hello')
+emitter:emit('cb2_test_on', 3, 4, 'world')
+
+print('-----------------------------------')
+

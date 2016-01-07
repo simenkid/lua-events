@@ -1,6 +1,5 @@
 ------------------------------------------------------------------------------
 -- EventEmitter Class in Node.js Style
--- 
 -- LICENSE: MIT
 -- Simen Li <simenkid@gmail.com>
 ------------------------------------------------------------------------------
@@ -11,6 +10,23 @@ local Events = { defaultMaxListeners = 10 }
 setmetatable(Events, {
     __call = function (_, ...) return Events:new(...) end
 })
+
+local function rmEntry(tbl, pred)
+    local x, len = 0, #tbl
+    for i = 1, len do
+        local trusy, idx = false, (i - x)
+        if (type(pred) == 'function') then trusy = pred(tbl[idx])
+        else trusy = tbl[idx] == pred
+        end
+
+        if (tbl[idx] ~= nil and trusy) then
+            tbl[idx] = nil
+            table.remove(tbl, idx)
+            x = x + 1
+        end
+    end
+    return tbl
+end
 
 function Events:new(obj)
     obj = obj or {}
@@ -47,7 +63,7 @@ end
 function Events:emit(ev, ...)
     local pfx_ev = PFX .. tostring(ev)
     local evtbl = self:getEvTable(pfx_ev)
-
+    print(args)
     if (evtbl ~= nil) then
         for _, lsn in ipairs(evtbl) do
             local status, err = pcall(lsn, ...)
@@ -65,7 +81,7 @@ function Events:emit(ev, ...)
             if not (status) then print(string.sub(_, PFX_LEN + 1) .. " emit error: " .. tostring(err)) end
         end
 
-        while (#evtbl ~= 0) do table.remove(evtbl, 1) end
+        rmEntry(evtbl, function (v) return v ~= nil  end)
         self._on[pfx_ev] = nil
     end
     return self
@@ -126,13 +142,11 @@ function Events:removeAllListeners(ev)
     if ev ~= nil then
         local pfx_ev = PFX .. tostring(ev)
         local evtbl = self:evTable(pfx_ev)
-
-        while (#evtbl ~= 0) do table.remove(evtbl, 1) end
+        rmEntry(evtbl, function (v) return v ~= nil  end)
 
         pfx_ev = pfx_ev .. ':once'
         evtbl = self:evTable(pfx_ev)
-
-        while (#evtbl ~= 0) do  table.remove(evtbl, 1) end
+        rmEntry(evtbl, function (v) return v ~= nil  end)
         self._on[pfx_ev] = nil
     else
         for _pfx_ev, _t in pairs(self._on) do self:removeAllListeners(string.sub(_pfx_ev, PFX_LEN + 1)) end
@@ -151,38 +165,14 @@ function Events:removeListener(ev, listener)
     local lsnCount = 0
     assert(listener ~= nil, "listener is nil")
     -- normal listener
-    for i, lsn in ipairs(evtbl) do
-        if lsn == listener then lsnCount = lsnCount + 1 end
-    end
-
-    while (lsnCount ~= 0) do
-        for i, lsn in ipairs(evtbl) do
-            if lsn == listener then
-                table.remove(evtbl, i)
-                lsnCount = lsnCount - 1
-            end
-        end
-    end
+    rmEntry(evtbl, listener)
 
     if (#evtbl == 0) then self._on[pfx_ev] = nil end
 
     -- emit-once listener
     pfx_ev = pfx_ev .. ':once'
     evtbl = self:evTable(pfx_ev)
-
-    lsnCount = 0
-    for i, lsn in ipairs(evtbl) do
-        if lsn == listener then lsnCount = lsnCount + 1 end
-    end
-
-    while (lsnCount ~= 0) do
-        for i, lsn in ipairs(evtbl) do
-            if lsn == listener then
-                table.remove(evtbl, i)
-                lsnCount = lsnCount - 1
-            end
-        end
-    end
+    rmEntry(evtbl, listener)
 
     if (#evtbl == 0) then self._on[pfx_ev] = nil end
     return self

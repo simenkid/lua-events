@@ -153,7 +153,7 @@ emitter:emit('cb1_test_once')
 emitter:emit('cb1_test_once')
 
 emitter:emit('cb2_test_on', 1, 2, 'hello')
-emitter:emit('cb2_test_on', 3, 4, 'world')
+emitter:emit('cb2_test_on', 3, 4, 'world', { a = 1 })
 
 print('-----------------------------------')
 

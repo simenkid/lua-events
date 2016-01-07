@@ -1,6 +1,7 @@
 lua-events
 ========================  
-Current version: v1.0.0 (stable)
+Current version: v1.0.0 (stable)  
+Compatible Lua version: 5.1.x  
 <br />
 
 ## Table of Contents
@@ -14,16 +15,17 @@ Current version: v1.0.0 (stable)
 
 **lua-events** is an EventEmitter class that provides you with APIs in node.js style.  
   
-I am using this module with my own [**nodemcu**](https://github.com/nodemcu/nodemcu-firmware) project on [ESP8266](http://www.esp8266.com/) WiFi Soc. It helps me write my code in *event-driven* style. I often grab a emitter from this module and use the emitter as an event hub in my application to control my program flow. Try it on **nodemcu**, it won't let you down.
-
+I am using this module with my own [**nodemcu**](https://github.com/nodemcu/nodemcu-firmware) project on [ESP8266](http://www.esp8266.com/) WiFi Soc. It helps me write my code in *event-driven* style. I often grab a emitter from this module and use the emitter as an event hub in my application to control my program flow. Try it on **nodemcu**, it won't let you down.  
+  
+If you like to code something in an asynchronous manner on **nodemcu**, might I sugguest [**nodemcu-timer**](https://github.com/simenkid/nodemcu-timer)? They are working well with each other to help arrange your asynchronous flow, e.g. your function can defer its callback and return right away.  
 
 <a name="Installation"></a>
 ## 2. Installation
 
 > $ git clone https://github.com/simenkid/lua-events.git
   
-Just include the file `lua-events.lua` to your project.  
-If you are with the **nodemcu** on ESP8266 WiFi SoC, it would be good to compile \*.lua text file into \*.lc.
+Just include the file `events.lua` or use the minified one `events_min.lua` in your project.  
+If you are with the **nodemcu** on ESP8266, it would be good for you to compile `*.lua` text file into `*.lc` bytecode to further reduce memory usage.  
 
 <a name="APIs"></a>
 ## 3. APIs
@@ -42,8 +44,14 @@ If you are with the **nodemcu** on ESP8266 WiFi SoC, it would be good to compile
 
 *************************************************
 ### EventEmitter Class
-Exposed by `require 'lua-events'`  
-  
+Exposed by `require 'events'`  
+    
+```lua
+local EventEmitter = require 'events'  -- or 'events_min'
+```
+
+<br />
+
 <a name="API_new"></a>
 ### EventEmitter:new([table])
 Create an instance of event emitter. If a table (or an object) is given, the table will inherit EventEmitter class and itself will be an event emiiter.
@@ -54,12 +62,12 @@ Create an instance of event emitter. If a table (or an object) is given, the tab
 
 **Returns:**  
   
-* (_Object_) emitter
+* (_object_) emitter
 
 **Examples:**
 
 ```lua
-local EventEmitter = require 'lua-events'
+local EventEmitter = require 'events'
 
 -- Inheritance
 local myObject = {

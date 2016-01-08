@@ -63,7 +63,6 @@ end
 function Events:emit(ev, ...)
     local pfx_ev = PFX .. tostring(ev)
     local evtbl = self:getEvTable(pfx_ev)
-    print(args)
     if (evtbl ~= nil) then
         for _, lsn in ipairs(evtbl) do
             local status, err = pcall(lsn, ...)

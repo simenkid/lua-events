@@ -27,6 +27,14 @@ If you like to code something in an asynchronous manner on **nodemcu**, might I 
 Just include the file `events.lua` or use the minified one `events_min.lua` in your project.  
 If you are with the **nodemcu** on ESP8266, it would be good for you to compile `*.lua` text file into `*.lc` bytecode to further reduce memory usage.  
 
+* FS/Memory footprint  
+
+    * events.lua: ~5.1 KB(file size) / ~17 KB (heap available after loaded)  
+    * events_min.lua: ~2.9 KB(size) / ~17 KB (heap)  
+    * events.lc: ~4.0 KB(size) / ~24 KB (heap)  
+    * timer.lc + events.lc: ~17.7 KB (heap)  
+    <br />
+
 <a name="APIs"></a>
 ## 3. APIs
 

@@ -22,7 +22,11 @@ If you like to code something in an asynchronous manner on **nodemcu**, might I 
 <a name="Installation"></a>
 ## 2. Installation
 
+Clone from github
 > $ git clone https://github.com/simenkid/lua-events.git
+
+or use npm install
+> $ npm install lua-eventemitter
   
 Just include the file `events.lua` or use the minified one `events_min.lua` in your project.  
 If you are with the **nodemcu** on ESP8266, it would be good for you to compile `*.lua` text file into `*.lc` bytecode to further reduce memory usage.  

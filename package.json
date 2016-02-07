@@ -1,0 +1,26 @@
+{
+  "name": "lua-eventemitter",
+  "version": "1.0.1",
+  "description": "lua-eventemitter is an EventEmitter class that provides you with APIs in node.js style.",
+  "main": "events_min.lua",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simenkid/lua-events.git"
+  },
+  "keywords": [
+    "lua",
+    "events",
+    "EventEmitter",
+    "esp8266",
+    "nodemcu"
+  ],
+  "author": "Simen Li",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/simenkid/lua-events/issues"
+  },
+  "homepage": "https://github.com/simenkid/lua-events#readme"
+}

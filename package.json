@@ -1,6 +1,6 @@
 {
   "name": "lua-eventemitter",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "lua-eventemitter is an EventEmitter class that provides you with APIs in node.js style.",
   "main": "events.lua",
   "scripts": {

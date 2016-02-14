@@ -3,7 +3,7 @@ local function d(e,f)local g,h=0,#e;for i=1,h do local j,k=false,i-g;if type(f)=
 function Events:new(l)l=l or{}self.__index=self;setmetatable(l,self)l._on={}return l end;function Events:evTable(m)if type(self._on[m])~='table'then self._on[m]={}end;return self._on[m]end;
 function Events:getEvTable(m)return self._on[m]end;function Events:addListener(m,n)local o=a..tostring(m)local p=self:evTable(o)local q=self.currentMaxListeners or self.defaultMaxListeners;
 local r=self:listenerCount(m)table.insert(p,n)if r>q then print('WARN: Number of '..string.sub(o,b+1).." event listeners: "..tostring(r))end;return self end;
-function Events:emit(m,...)local o=a..tostring(m)local p=self:getEvTable(o)print(args)if p~=nil then for c,s in ipairs(p)do local t,u=pcall(s,...)if not t then print(string.sub(c,b+1).." emit error: "..tostring(u))end end end;
+function Events:emit(m,...)local o=a..tostring(m)local p=self:getEvTable(o) if p~=nil then for c,s in ipairs(p)do local t,u=pcall(s,...)if not t then print(string.sub(c,b+1).." emit error: "..tostring(u))end end end;
 o=o..':once'p=self:getEvTable(o)if p~=nil then for c,s in ipairs(p)do local t,u=pcall(s,...)if not t then print(string.sub(c,b+1).." emit error: "..tostring(u))end end;
 d(p,function(v)return v~=nil end)self._on[o]=nil end;return self end;function Events:getMaxListeners()return self.currentMaxListeners or self.defaultMaxListeners end;
 function Events:listenerCount(m)local w=0;local o=a..tostring(m)local p=self:getEvTable(o)if p~=nil then w=w+#p end;o=o..':once'p=self:getEvTable(o)if p~=nil then w=w+#p end;return w end;
